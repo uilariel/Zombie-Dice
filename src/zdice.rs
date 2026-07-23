@@ -7,7 +7,7 @@ s -> shot/tiro
 f -> foot/pegada
 b -> brain/cerebro
 */
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq )]
 pub enum Face {
 
     Cerebro,
