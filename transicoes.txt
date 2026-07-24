@@ -1,0 +1,30 @@
+WELCOME
+oq faz:
+-> pega a read_line, separa todos os nomes e joga eles dentro de um vetor temporario
+-> cria jogadores com os nomes q foram jogador pra dentro do vetor
+-> embaralha esse vetor
+-> transiciona
+
+exibe:
+mensagem de bem vindo e pedir pra inserir os nomes dos jogadores
+
+WELCOME -> PREPARING MATCH
+transicao: quando os nomes dos jogadores forem inseridos (getline)
+
+WELCOME -> WELCOME
+transicao: menos que 2 a mais que 6 jogadores foram inseridos
+exib:numero invalido de jogadores
+
+=====================================================================================
+PREPARING MATCH
+oq faz:
+->apenas aguarda
+
+exibe:
+->exibe a ordem que os jogadores irao jogar 
+->solicita que o usuario aperte enter pra continuar
+
+PREPARING MATCH -> PLAYING
+-> apertou <enter>
+======================================================================================
+PLAYING

@@ -54,6 +54,11 @@ impl Player
     {
         self.cerebros_comidos += quantidade;
     }
+    
+    pub fn GetNome(&self) -> &String
+    {
+        &self.nome
+    }
 
 
     

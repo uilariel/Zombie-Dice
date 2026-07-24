@@ -1,6 +1,6 @@
 //struct que vai guardar algumas variaveis temporarias que vao servir pra reger os turnos 
 
-use rand::distr::Iter;
+use rand::{distr::Iter, seq::SliceRandom};
 
 use crate::{dice_bag::DiceBag, player::Player};
 use std::io::stdin;
@@ -28,12 +28,12 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
 {
     match estado
     {
-        Estado::Welcome => Welcomefn(),
+        Estado::Welcome => Welcomefn(players, estado, input),
+        Estado::PreparingMatch => PreparingMatchfn(players, estado, input),
     }
 }
 
-
-pub fn Welcomefn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
+ fn Welcomefn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
 {   
     //acho q vou ter q tirar isso depois
     println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
@@ -62,11 +62,48 @@ pub fn Welcomefn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut Str
         players.push(jogador);
 
         }
-
+        let mut rng = rand::rng();
+         players.shuffle(&mut rng);
         *estado = Estado::Playing;
     }
     else {
-        //ESCREVA AQUI A MENSAGEM PRA INSERIR DE NOVO
+        let x = jogadores.len();
+        println!("voce inseriu {} jogadores, o permitido eh entre 2 e 6\nENCERRANDO JOGO", x);
+        
+        *estado = Estado::Quitting;
     }
 }
+
+
+fn PreparingMatchfn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String){
+
+
+    println!("a ordem de jogadores sera:\n");
+    for player in players.iter(){
+        let jogador = player.GetNome();
+        println!("{}\n", jogador);
+    }
+
+
+
+
+    println!("digite <enter> pra continuar\n");
+    //vou por println so pra debugar mas depois vo tirar essa bosta
+    match input.trim()
+    {
+        "" => *estado = Estado::Playing,
+        _ => {}
+    }
+}
+
+
+
+fn Playingfn(){}
+fn Quittingfn(){}
+fn Holdingfn(){}
+fn Rollingfn(){}
+fn Lostfn(){}
+fn AddBrainsfn(){}
+fn Drawfn(){}
+fn Winfn(){}
 
