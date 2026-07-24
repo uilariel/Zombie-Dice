@@ -19,10 +19,10 @@ pub struct Player
 */
 impl Player
 {
-    pub fn new(nome: String) -> Self
+    pub fn new(nome: &str) -> Self
     {
         Self {
-            nome,
+            nome: nome.to_string(),
             cerebros_comidos: 0,
             turnos_jogados: 0,
         }
