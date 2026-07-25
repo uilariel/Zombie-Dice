@@ -16,7 +16,7 @@ enum Estado
     Playing,
     Quitting,
     Holding,
-    ROlling,
+    Rolling,
     Lost,
     AddBrais,
     TurnResult,
@@ -28,12 +28,12 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
 {
     match estado
     {
-        Estado::Welcome => Welcomefn(players, estado, input),
-        Estado::PreparingMatch => PreparingMatchfn(players, estado, input),
+        Estado::Welcome => welcome_fn(players, estado, input),
+        Estado::PreparingMatch => preparing_match_fn(players, estado, input),
     }
 }
 
- fn Welcomefn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
+ fn welcome_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
 {   
     //acho q vou ter q tirar isso depois
     println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
@@ -48,7 +48,7 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
     COLLECT -> ESTAMOS JOGADANDO TUDO DENTRO DO VETOR JOGADORES
     QUANDO USAMOS SPLIT O TIPO VAI DE STRING PRA &STR.
      */
-    let mut jogadores :Vec<&str> = input.split(',').map(|s| s.trim()).collect();
+    let jogadores :Vec<&str> = input.split(',').map(|s| s.trim()).collect();
 
 
     if jogadores.len() > 2 && jogadores.len() < 7
@@ -75,19 +75,19 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
 }
 
 
-fn PreparingMatchfn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String){
+fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String){
 
 
     println!("a ordem de jogadores sera:\n");
     for player in players.iter(){
-        let jogador = player.GetNome();
+        let jogador = player.get_nome();
         println!("{}\n", jogador);
     }
 
 
 
 
-    println!("digite <enter> pra continuar\n");
+    println!("digite <enter> pra continuar\n"); //pedir pro usuario digitar enter pra continuar 
     //vou por println so pra debugar mas depois vo tirar essa bosta
     match input.trim()
     {
@@ -98,12 +98,25 @@ fn PreparingMatchfn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut 
 
 
 
-fn Playingfn(){}
-fn Quittingfn(){}
-fn Holdingfn(){}
-fn Rollingfn(){}
-fn Lostfn(){}
-fn AddBrainsfn(){}
-fn Drawfn(){}
-fn Winfn(){}
+fn playing_fn(estado: &mut Estado, input: &mut String){
+
+    //temos que exibir no render as opcoes que o usuario tem
+    match input.trim().to_uppercase().as_str()
+    {
+        "Q" => *estado = Estado::Quitting,
+        "H" => *estado = Estado::Holding,
+        "R" => *estado = Estado::Rolling,
+         _ => {},
+    }
+}
+
+
+
+fn quitting_fn(){}
+fn holding_fn(){}
+fn rolling_fn(){}
+fn lostfn(){}
+fn add_brains_fn(){}
+fn draw_fn(){}
+fn win_fn(){}
 

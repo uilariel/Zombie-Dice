@@ -1,6 +1,6 @@
 use core::panic;
 
-use rand::{Rng, random, random_range};
+use rand::{random_range};
 
 /*
 s -> shot/tiro
@@ -40,7 +40,7 @@ impl Zdice
     pub fn rolar(&mut self)
     {   
         //random num between 0 and 5
-        let mut rng = random_range(0..=5);
+        let rng = random_range(0..=5);
         let face: char = self.faces[rng];
         match face
         {
@@ -59,36 +59,37 @@ impl Zdice
         let yellow = ['b','b','f','f','s','s'];
         let green = ['b','b','b','f','f','s'];
         let red = ['b','f','f','s','s','s'];
-        match cor
+        match cor.as_str()
         {
-            amarelo => Self {
+            "amarelo" => Self {
                 cor: Cor::Amarelo,
                 faces: yellow,
                 face_que_caiu: Face::None,
             },
 
-            verde => Self {
+            "verde" => Self {
                 cor: Cor::Verde,
                 faces: green,
                 face_que_caiu: Face::None,
             },
 
-            vermelho => Self {
+            "vermelho" => Self {
                 cor: Cor::Vermelho,
                 faces: red,
                 face_que_caiu: Face::None,
             },
+            _ => panic!("Cor invalida!"),
         }
     }
 
     //getter da face que caiu no dado
-    pub fn getFQC(&self) -> &Face
+    pub fn get_fqc(&self) -> &Face
     {
         &self.face_que_caiu
     }
 
     //getter da cor do dado
-    pub fn getCor(&self) -> &Cor
+    pub fn get_cor(&self) -> &Cor
     {
         &self.cor
     }

@@ -30,32 +30,32 @@ impl Player
 
 
     //getter da quantidade de cerebros que o jogador comeu
-    pub fn GetCerebros(&self) -> &i32
+    pub fn get_cerebros(&self) -> &i32
     {
         &self.cerebros_comidos
     }
 
     //getter da quantidade de turnos que o jogador jogou
-    pub fn GetTurnos(&self) -> &i32
+    pub fn get_turnos(&self) -> &i32
     {
         &self.turnos_jogados
     }
 
 
     //adciona 1 turno ao turno do jogador
-    pub fn AddTurno(&mut self)
+    pub fn add_turno(&mut self)
     {
         self.turnos_jogados+=1;
     }
 
 
     //adciona a quantidade inserida ao contador de cerebros comidos do jogador
-    pub fn AddCerebro(&mut self, quantidade: i32)
+    pub fn add_cerebro(&mut self, quantidade: i32)
     {
         self.cerebros_comidos += quantidade;
     }
     
-    pub fn GetNome(&self) -> &String
+    pub fn get_nome(&self) -> &String
     {
         &self.nome
     }
