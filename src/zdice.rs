@@ -59,7 +59,7 @@ impl Zdice
         let yellow = ['b','b','f','f','s','s'];
         let green = ['b','b','b','f','f','s'];
         let red = ['b','f','f','s','s','s'];
-        match cor.as_str()
+        match cor.to_lowercase().as_str()
         {
             "amarelo" => Self {
                 cor: Cor::Amarelo,

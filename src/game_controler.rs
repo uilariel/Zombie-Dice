@@ -24,13 +24,14 @@ enum Estado
     Win,
 }
 
-pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag, input: &mut String, rodando: &mut bool, info_temp:&mut InfoTemp  )
+pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag, input: &mut String, info_temp:&mut InfoTemp, rodando: &mut bool  )
 {
     match estado
     {
         Estado::Welcome => welcome_fn(players, estado, input),
         Estado::PreparingMatch => preparing_match_fn(players, estado, input),
-    }
+        Estado::Quitting => quitting_fn(estado, rodando),
+    } 
 }
 
  fn welcome_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
@@ -97,7 +98,7 @@ fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mu
 }
 
 
-
+//apenas gerencia a transicao do estado, nao tem muito mais logica alem disso
 fn playing_fn(estado: &mut Estado, input: &mut String){
 
     //temos que exibir no render as opcoes que o usuario tem
@@ -111,8 +112,21 @@ fn playing_fn(estado: &mut Estado, input: &mut String){
 }
 
 
+//encerra o programa
+fn quitting_fn(estado: &mut Estado, rodando: &mut bool, input: &mut String){
+    
 
-fn quitting_fn(){}
+    if input.trim() == ""{
+    *rodando = false;
+    }
+    else {
+        println!("era pra apertar enter mas vo encerrar igual otario");
+        *rodando = false;
+    }
+    //exibe algo tipo obrigado por jogar o zombie dice e pede pro jogador apertar enter pra encerrar
+}
+
+
 fn holding_fn(){}
 fn rolling_fn(){}
 fn lostfn(){}
