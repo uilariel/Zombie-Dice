@@ -28,3 +28,30 @@ PREPARING MATCH -> PLAYING
 -> apertou <enter>
 ======================================================================================
 PLAYING
+oq faz:
+-> apenas exibe na tela as opcoes e aguarda o input
+
+exibe:
+-> mensagem perguntando qual acao o jogador quer tomar
+-> H = contabilizar oq foi pego e parar de jogar 
+-> R = jogador o dado
+-> Q = encerrar o jogo 
+
+PLAYING -> HOLDING
+transicao: input = H
+
+PLAYING -> ROLLING
+transicao: input = R
+
+PLAYING -> QUITTING
+transicao: input = Q 
+
+==========================================================================================
+QUITTING
+oq faz: so seta o bool rodando como false e encerra o programa
+
+exibe:
+-> uma mensagem pedindo pro jogador digitar enter pra encerrar, mas vai encerrar
+de qualquer jeito
+===========================================================================================
+HOLDING

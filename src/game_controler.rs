@@ -3,9 +3,45 @@
 use rand::{distr::Iter, seq::SliceRandom};
 
 use crate::{dice_bag::DiceBag, player::Player};
+use core::num;
 use std::io::stdin;
+
+
+
+/*
+    A STRUCT INFO TEMPO VAI ARMAZENAR INFORMACOES QUE VAO SER USADAS PRA REGER OS TURNOS MELHOR.
+    cerebros -> acumula os cerebros que o jogador for comendo ate a hora que ele decidir contabilizar todos ou morrer
+    tiros -> acumula a quantidade de tiros que o jogador tomou na sua rodada
+    turnos_completos -> vai ser incrementado sempre que todos os jogadores jogarem a mesma quantidade de vezes.
+    turno_atual -> vai servir para reger o vetor circular de 0 ate n-1, com n sendo o numero de jogadores
+*/
 struct InfoTemp
 {
+    cerebros: i32,
+    tiros: i32,
+    turnos_completos: i32,
+    turno_atual: usize,
+}
+
+impl InfoTemp
+{
+    pub fn new() -> Self 
+    {
+        Self { cerebros: 0, tiros: 0, turnos_completos: 0, turno_atual: 0 }
+    
+    }
+
+    pub fn reset(&mut self)
+    {
+        self.cerebros = 0;
+        self.tiros = 0;
+    }
+
+    pub fn prox_turno(&mut self, num_players: usize)
+    {
+        self.turno_atual = (self.turno_atual + 1)  % num_players;
+    
+    }
 
 }
 
@@ -18,7 +54,6 @@ enum Estado
     Holding,
     Rolling,
     Lost,
-    AddBrais,
     TurnResult,
     Draw,
     Win,
@@ -30,7 +65,7 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
     {
         Estado::Welcome => welcome_fn(players, estado, input),
         Estado::PreparingMatch => preparing_match_fn(players, estado, input),
-        Estado::Quitting => quitting_fn(estado, rodando),
+        Estado::Quitting => quitting_fn(rodando, input),
     } 
 }
 
@@ -113,7 +148,7 @@ fn playing_fn(estado: &mut Estado, input: &mut String){
 
 
 //encerra o programa
-fn quitting_fn(estado: &mut Estado, rodando: &mut bool, input: &mut String){
+fn quitting_fn (rodando: &mut bool, input: &mut String){
     
 
     if input.trim() == ""{
@@ -127,7 +162,29 @@ fn quitting_fn(estado: &mut Estado, rodando: &mut bool, input: &mut String){
 }
 
 
-fn holding_fn(){}
+fn holding_fn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp, input: &mut String){
+
+    players[info_temp.turno_atual].add_cerebro(info_temp.cerebros);
+
+
+    //chama a render aqui.
+
+    //RESETA AS VARIAVEIS QUE FORAM FEITAS PRA SEREM RESETADAS
+    info_temp.reset();
+
+    if input.trim() == ""
+    {
+        *estado = Estado::TurnResult;
+    }
+    else {
+
+        //nao sei como nao fazer ele quebrar caso digitem o negocio errado e quero pensar nisso depois que a logica tiver funcionando.
+        *estado = Estado::TurnResult
+    }
+
+}
+
+
 fn rolling_fn(){}
 fn lostfn(){}
 fn add_brains_fn(){}
