@@ -54,4 +54,23 @@ exibe:
 -> uma mensagem pedindo pro jogador digitar enter pra encerrar, mas vai encerrar
 de qualquer jeito
 ===========================================================================================
-HOLDING
+HOLDING:
+-> CHEGAR NESSE ESTADO INDICA QUE O USUARIO OPTOU POR CONTABILIZAR OS CEREBROS QUE ELE PEGOU AO INVEZ DE TENTAR JOGAR NOVAMENTE. A PARTIR DAQUI SABEMOS QUE DEVEMOS PEGAR OS CEREBROS ACUMULADOS E CONTABILIZAR NA STRUCT DO PLAYER.
+
+oq faz:
+->contabiliza os cerebros que foram acumulados
+->reseta as variaveis temporarias que nao sao necessarias para zero
+->muda pra turn result
+
+
+exibe:
+->Que cacada excelente!
+->voce comeu x cerebros e tomou x tiros, parabens!
+
+HOLDING -> TURN RESULT
+transicao: input = empty()
+============================================================================================
+ROLLING
+-> AQUI EH ONDE O JOGO ACONTECE. O JOGADOR DECIDIU RODAR O DADO. CHAMAR A FUNCAO DE ROLAR, CONTABILIZAR OQ CAIR EM CIMA DO Q TINHA ANTEORIORMENTE E A PARTIR DISSO DECIDIR SE O TURNO DELE ACABOU E ELE PERDEU OU SE ELE VAI TER
+A CHANCE DE VOLTAR PARA O PLAYING E JOGAR NOVAMENTE.
+

@@ -2,7 +2,7 @@
 
 use rand::{distr::Iter, seq::SliceRandom};
 
-use crate::{dice_bag::DiceBag, player::Player};
+use crate::{dice_bag::DiceBag, player::Player, zdice::Face};
 use core::num;
 use std::io::stdin;
 
@@ -43,6 +43,26 @@ impl InfoTemp
     
     }
 
+    pub fn add_cerebro(&mut self)
+    {
+        self.cerebros+=1;
+    }
+
+    pub fn add_tiro(&mut self)
+    {
+        self.tiros+=1;
+    }
+
+    pub fn get_cerebros_temp(&self) -> &i32
+    {
+        &self.cerebros
+    }
+
+    pub fn get_tiros_temp(&self) -> &i32
+    {
+        &self.tiros
+    }
+
 }
 
 enum Estado
@@ -63,18 +83,24 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
 {
     match estado
     {
-        Estado::Welcome => welcome_fn(players, estado, input),
-        Estado::PreparingMatch => preparing_match_fn(players, estado, input),
-        Estado::Quitting => quitting_fn(rodando, input),
+        Estado::Welcome => welcome_fn(players, estado),
+        Estado::PreparingMatch => preparing_match_fn(players, estado),
+        Estado::Quitting => quitting_fn(rodando),
     } 
 }
 
- fn welcome_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String)
+ fn welcome_fn(players: &mut Vec<Player>, estado: &mut Estado)
 {   
+
+    let mut input = String::new();
+
+    stdin()
+        .read_line(&mut input);
+
     //acho q vou ter q tirar isso depois
     println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
         stdin()
-        .read_line(input)
+        .read_line(&mut input)
         .expect("falha ao ler input");
 
 
@@ -101,6 +127,7 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
         let mut rng = rand::rng();
          players.shuffle(&mut rng);
         *estado = Estado::Playing;
+        println!("jogadores registrados com sucesso!/nDigite <enter> para continuar\n")
     }
     else {
         let x = jogadores.len();
@@ -108,10 +135,16 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
         
         *estado = Estado::Quitting;
     }
+
+    let mut input2 = String::new();
+
+    stdin()
+    .read_line(&mut input2);
+
 }
 
 
-fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mut String){
+fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado){
 
 
     println!("a ordem de jogadores sera:\n");
@@ -125,44 +158,59 @@ fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado, input: &mu
 
     println!("digite <enter> pra continuar\n"); //pedir pro usuario digitar enter pra continuar 
     //vou por println so pra debugar mas depois vo tirar essa bosta
-    match input.trim()
-    {
-        "" => *estado = Estado::Playing,
-        _ => {}
-    }
+    let mut input = String::new();
+    stdin()
+    .read_line(&mut input);
+    *estado = Estado::Playing;
+     
+    
 }
 
 
 //apenas gerencia a transicao do estado, nao tem muito mais logica alem disso
-fn playing_fn(estado: &mut Estado, input: &mut String){
+fn playing_fn(estado: &mut Estado){
 
+
+    let mut input = String::new();
+    stdin()
+    .read_line(&mut input);
     //temos que exibir no render as opcoes que o usuario tem
     match input.trim().to_uppercase().as_str()
     {
-        "Q" => *estado = Estado::Quitting,
-        "H" => *estado = Estado::Holding,
-        "R" => *estado = Estado::Rolling,
+        "Q" =>{ 
+            *estado = Estado::Quitting;
+            println!("voce selecionou Q!, saindo do jogo!\n")
+        }
+        "H" => {
+            *estado = Estado::Holding;
+            println!("voce selecionou H, holdando!\n");
+
+        }
+        "R" => {
+            *estado = Estado::Rolling;
+            println!("voce selecionou R, vamos rolar os dados!\n")
+        }
          _ => {},
     }
+
+   let mut input2 = String::new();
+    stdin()
+    .read_line(&mut input2);
+
+    println!("digite <enter> para continuar>")
 }
 
 
 //encerra o programa
-fn quitting_fn (rodando: &mut bool, input: &mut String){
+fn quitting_fn (rodando: &mut bool){
     
 
-    if input.trim() == ""{
-    *rodando = false;
-    }
-    else {
-        println!("era pra apertar enter mas vo encerrar igual otario");
-        *rodando = false;
-    }
-    //exibe algo tipo obrigado por jogar o zombie dice e pede pro jogador apertar enter pra encerrar
+   *rodando = false;
+   println!("obrigado por jogar o zombie dice!\ndigite <enter> para encerrar o programa!")
 }
 
 
-fn holding_fn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp, input: &mut String){
+fn holding_fn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp){
 
     players[info_temp.turno_atual].add_cerebro(info_temp.cerebros);
 
@@ -172,22 +220,87 @@ fn holding_fn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut Inf
     //RESETA AS VARIAVEIS QUE FORAM FEITAS PRA SEREM RESETADAS
     info_temp.reset();
 
-    if input.trim() == ""
-    {
-        *estado = Estado::TurnResult;
-    }
-    else {
+    
+    println!("foi esperto! holdou e comeu {} cerebros\ndigite <enter> para continuar", players[info_temp.turno_atual].get_cerebros());
+    *estado = Estado::TurnResult;
+    
+    let mut input = String::new();
+    stdin()
+        .read_line(&mut input);
+  
 
-        //nao sei como nao fazer ele quebrar caso digitem o negocio errado e quero pensar nisso depois que a logica tiver funcionando.
-        *estado = Estado::TurnResult
-    }
+
 
 }
 
+/*====================================================================================
+    OQUE A FUNCAO ROILLING PRECISA FAZER:
+    1-> rolar os dados
+    2-> processar o resultado dos dados
+    3-> decidir o proximo estado da maquina
+    [VAMOS PRECISAR DE VARIAVEIS LOCAIS, UMA PRA OS TIROS DESSA ROLAGEM 
+    E OUTRA OS CEREBROS]
+    
+    =>etapa 1:
 
-fn rolling_fn(){}
-fn lostfn(){}
-fn add_brains_fn(){}
+
+*/
+fn rolling_fn(estado: &mut Estado, info_temp:&mut InfoTemp, dados: &mut DiceBag){
+    
+    //apos chamar essa funcao vamos ter 3 dados rolados nos ultimos 3 vetores da mesa
+    dados.puxar();
+
+    //ler os 3 ultimos dados do vetor da mesa
+
+    for i in 0..3
+    {   
+        //ultimo dado do vetor da mesa
+        let index = dados.get_quantidade_mesa() - 1;
+        let face = dados.get_fqc_mesa(index - i);
+
+        //adcionando aos contadores temporarios asa faces que os dados rolados puxados cairam
+        match face 
+        {
+            Face::Cerebro => info_temp.add_cerebro(),
+            Face::Tiro => info_temp.add_tiro(),
+            _ => {},
+        }
+    }
+        //contando o total acumulado pra ver pra qual estado mudar
+        let  total_brains =  info_temp.get_cerebros_temp();
+        let  total_shots = info_temp.get_tiros_temp();
+
+
+    
+        //mandando o jogador pro canto
+        if *total_shots >= 3
+        {
+        println!("infelizmente voce foi abatido!\ntotal de cerebros que voce poderia ter comido: {}\ntotal de tiros recebidos: {}\nDigite<enter> para continuar",total_brains, total_shots);
+        let mut input = String::new();
+        stdin()
+            .read_line(&mut input);
+        
+            if input.trim() == ""{
+            *estado = Estado::Lost;
+            }
+        }
+        else
+        {   
+            println!("boa campanha!\n cerebros comidos ate agora: {}\ntiros totais recebidos: {}\nDigite<enter> para continuar", total_brains, total_shots);
+            let mut input = String::new();
+            stdin()
+            .read_line(&mut input);
+        
+            if input.trim() == ""
+            {
+            *estado = Estado::Playing;
+            }
+        }
+}
+
+fn lostfn(){
+
+}
 fn draw_fn(){}
 fn win_fn(){}
 

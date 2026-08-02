@@ -141,6 +141,16 @@ impl DiceBag
         }
     }
 
+
+    pub fn get_quantidade_mesa(&self) -> usize
+    {
+        self.dados_mesa.len()
+    }
+
+     pub fn get_fqc_mesa(&self, index: usize) -> &Face
+    {
+        self.dados_mesa[index].get_fqc()
+    }
     
 
 }

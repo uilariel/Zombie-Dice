@@ -1,3 +1,5 @@
+use crate::zdice::Face;
+
 
 // a struct player vai guardar:
 //1-> a quantidade de cerebros que o jogador comeu
@@ -53,6 +55,7 @@ impl Player
     pub fn add_cerebro(&mut self, quantidade: i32)
     {
         self.cerebros_comidos += quantidade;
+
     }
     
     pub fn get_nome(&self) -> &String
@@ -60,6 +63,8 @@ impl Player
         &self.nome
     }
 
+
+   
 
     
 }
