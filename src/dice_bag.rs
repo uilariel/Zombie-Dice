@@ -77,35 +77,24 @@ impl DiceBag
         self.dados_saco.shuffle(&mut rng);
 
         for _ in 1..=3{
-            let dado = self.dados_saco.pop().unwrap();
+            let mut dado = self.dados_saco.pop().unwrap();
+            dado.rolar();
             self.dados_mesa.push(dado);
         }
 
     }
 
-     fn devolver_pegada(&mut self)
-    {   
-        let mut tracker = 0;
-        let tamanho_mesa =  self.dados_mesa.len();
+ fn devolver_pegada(&mut self) {
+    // separa os dados de "Pegada" do resto
+    let (pegada, resto): (Vec<_>, Vec<_>) = self.dados_mesa
+        .drain(..)
+        .partition(|dado| dado.get_fqc() == &Face::Pegada);
 
-        //esse loop for move os dados de pegada pro final do vetor da mesa
-        //a variavel tracker conta quantos dados foram movidos 
-        for i in 0..self.dados_mesa.len(){
-            if self.dados_mesa[i].get_fqc() == &Face::Pegada
-            {
-                self.dados_mesa.swap(i, tamanho_mesa - i);
-                tracker+=1;
-            }
-        }
+    self.dados_mesa = resto;
 
-        //remove o ultimo elemento do vetor de dados da mesa e da o valor dele ao dado
-        //joga esse dado dentro do saco
-        for _ in 0..tracker{
-            let dado = self.dados_mesa.pop().unwrap();
-            self.dados_saco.push(dado);
-        }
-
-    }
+    // devolve os dados de pegada pro saco (supondo que seja essa a intenção)
+    self.dados_saco.extend(pegada);
+}
 
      fn devolver_cerebro(&mut self)
     {

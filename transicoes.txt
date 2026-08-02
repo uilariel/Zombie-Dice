@@ -74,3 +74,39 @@ ROLLING
 -> AQUI EH ONDE O JOGO ACONTECE. O JOGADOR DECIDIU RODAR O DADO. CHAMAR A FUNCAO DE ROLAR, CONTABILIZAR OQ CAIR EM CIMA DO Q TINHA ANTEORIORMENTE E A PARTIR DISSO DECIDIR SE O TURNO DELE ACABOU E ELE PERDEU OU SE ELE VAI TER
 A CHANCE DE VOLTAR PARA O PLAYING E JOGAR NOVAMENTE.
 
+oq faz: 
+->rola os dados
+->contabiliza tiros e cerebros temporarios
+->encaminha o jogador pra lost ou playing.
+
+exibir:
+->quantidade que ele comeu no total
+->tiros que recebeu
+
+ROLLING -> LOST 
+transicao: 3 ou mais tiros acumulados
+
+ROLLING -> playing
+transicao: menos de 3 tiros acumulados
+=============================================================================================
+LOST
+-> AQUI O JOGADOR OPTOU POR ROLLING E ACABOU ACUMULANDO 3 TIROS 
+
+oq faz:
+->nao contabiliza nada
+->reseta as variaveis temporarias 
+->muda pra turn result
+
+LOST -> TURN RESULT
+transicao: acontece independente de qualquer coisa
+==============================================================================================
+TURN RESULT
+-> AQUI O JOGADOR VEIO DO LOST OU DO HOLDING, ENTAO ELE JA TEVE OS
+CEREBROS CONTABILIZADOS E AS VARIAVEIS RESETADAS
+-> PRECISAMOS CHECAR SE HOUVE IMPATE, VITORIA E REGER O TURNO
+
+oq faz:
+->checa se houve impate ou vitoria
+->incrementa turnos gerais se necessario
+->passa pro proximo jogador.
+

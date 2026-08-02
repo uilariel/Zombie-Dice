@@ -4,7 +4,7 @@ use rand::{distr::Iter, seq::SliceRandom};
 
 use crate::{dice_bag::DiceBag, player::Player, zdice::Face};
 use core::num;
-use std::io::stdin;
+use std::{io::stdin, ops::ControlFlow::Continue};
 
 
 
@@ -15,7 +15,7 @@ use std::io::stdin;
     turnos_completos -> vai ser incrementado sempre que todos os jogadores jogarem a mesma quantidade de vezes.
     turno_atual -> vai servir para reger o vetor circular de 0 ate n-1, com n sendo o numero de jogadores
 */
-struct InfoTemp
+pub struct InfoTemp
 {
     cerebros: i32,
     tiros: i32,
@@ -63,9 +63,23 @@ impl InfoTemp
         &self.tiros
     }
 
+    pub fn add_turnos(&mut self)
+    {
+        self.turnos_completos+=1;
+    }
+
 }
 
-enum Estado
+
+enum Fases
+{
+    TurnoIncompleto,
+    TurnoCompleto,
+    Ganhou,
+    Empate,
+
+}
+pub enum Estado
 {
     Welcome,
     PreparingMatch,
@@ -79,13 +93,20 @@ enum Estado
     Win,
 }
 
-pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag, input: &mut String, info_temp:&mut InfoTemp, rodando: &mut bool  )
+pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag, info_temp:&mut InfoTemp, rodando: &mut bool  )
 {
     match estado
     {
         Estado::Welcome => welcome_fn(players, estado),
         Estado::PreparingMatch => preparing_match_fn(players, estado),
+        Estado::Playing => playing_fn(estado, players, info_temp),
         Estado::Quitting => quitting_fn(rodando),
+        Estado::Holding => holding_fn(players, estado, info_temp),
+        Estado::Rolling => rolling_fn(estado, info_temp, dados),
+        Estado::Lost => lostfn(players, estado, info_temp),
+        Estado::TurnResult => turn_result(players, estado, info_temp, dados),
+        Estado::Draw => draw_fn(players, info_temp, estado),
+        Estado::Win => win_fn(players, estado),
     } 
 }
 
@@ -93,15 +114,13 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
 {   
 
     let mut input = String::new();
+    println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
 
     stdin()
         .read_line(&mut input);
 
     //acho q vou ter q tirar isso depois
-    println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
-        stdin()
-        .read_line(&mut input)
-        .expect("falha ao ler input");
+        
 
 
     /*
@@ -113,7 +132,7 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
     let jogadores :Vec<&str> = input.split(',').map(|s| s.trim()).collect();
 
 
-    if jogadores.len() > 2 && jogadores.len() < 7
+    if jogadores.len() >= 2 && jogadores.len() < 7
     {
         for i in 0..jogadores.len()
         {   
@@ -126,8 +145,8 @@ pub fn Update(estado: &mut Estado, players: &mut Vec<Player>,dados: &mut DiceBag
         }
         let mut rng = rand::rng();
          players.shuffle(&mut rng);
-        *estado = Estado::Playing;
-        println!("jogadores registrados com sucesso!/nDigite <enter> para continuar\n")
+        *estado = Estado::PreparingMatch;
+        println!("jogadores registrados com sucesso!\nDigite <enter> para continuar\n")
     }
     else {
         let x = jogadores.len();
@@ -150,7 +169,7 @@ fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado){
     println!("a ordem de jogadores sera:\n");
     for player in players.iter(){
         let jogador = player.get_nome();
-        println!("{}\n", jogador);
+        println!("{}", jogador);
     }
 
 
@@ -168,9 +187,14 @@ fn preparing_match_fn(players: &mut Vec<Player>, estado: &mut Estado){
 
 
 //apenas gerencia a transicao do estado, nao tem muito mais logica alem disso
-fn playing_fn(estado: &mut Estado){
+fn playing_fn(estado: &mut Estado, players: &mut Vec<Player>, info_temp:&mut InfoTemp){
 
 
+
+    println!("vez do jogador {}\nOque voce gostaria de fazer?\n
+Q=> quit
+R=> rolar os dados
+H=> encerrar o turno", players[info_temp.turno_atual].get_nome());
     let mut input = String::new();
     stdin()
     .read_line(&mut input);
@@ -213,6 +237,7 @@ fn quitting_fn (rodando: &mut bool){
 fn holding_fn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp){
 
     players[info_temp.turno_atual].add_cerebro(info_temp.cerebros);
+    players[info_temp.turno_atual].add_turno();
 
 
     //chama a render aqui.
@@ -298,9 +323,165 @@ fn rolling_fn(estado: &mut Estado, info_temp:&mut InfoTemp, dados: &mut DiceBag)
         }
 }
 
-fn lostfn(){
+fn lostfn(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp){
+    //adcionando turno ao jogador
+    players[info_temp.turno_atual].add_turno();
+    info_temp.reset();
+
+    println!("entrando e saindo de lostfb/n");
+
+    *estado = Estado::TurnResult;
 
 }
-fn draw_fn(){}
-fn win_fn(){}
 
+fn turn_result(players: &mut Vec<Player>, estado: &mut Estado, info_temp:&mut InfoTemp, dados: &mut DiceBag){
+
+ let fase = checa_empate_ou_vitoria(players);
+
+ match fase 
+    {
+        Fases::Empate =>
+        {           
+            *estado = Estado::Draw;
+            println!("o jogo empatou!, indo para o estado Draw!\nPressione <enter> para avancar");
+        }
+        Fases::TurnoCompleto =>
+        {   
+            println!("um turno foi completo!\nadcionando 1 ao contador!\npressione <enter> para avancar");
+            info_temp.add_turnos();
+            *estado = Estado::Playing;
+            info_temp.prox_turno(players.len());
+        }
+        Fases::TurnoIncompleto =>
+        {
+            info_temp.prox_turno(players.len());
+            println!("o jogo segue! vez do jogador(a) {}", players[info_temp.turno_atual].get_nome());
+            *estado = Estado::Playing;
+        }
+        Fases::Ganhou => 
+        {
+            *estado = Estado::Win;
+            println!("alguem ganhou!!\nPressione <enter> para continuar");
+        }
+    }
+
+    //input para continuar
+    let mut input = String::new();
+    stdin()
+        .read_line(&mut input);
+
+    dados.devolver_dados();
+    
+
+}
+
+fn win_fn(players: &mut Vec<Player>, estado: &mut Estado){
+    
+    for i in 0..players.len()
+    {
+        if *players[i].get_cerebros() >= 13
+        {
+            println!("parabens {} voce ganhou a partida comendo um total de {} cerebros!!!\n", players[i].get_nome(), players[i].get_cerebros());
+            *estado = Estado::Quitting;
+        }
+    }
+
+    println!("pressione <enter> para continuar\n");
+
+    let mut input = String::new();
+
+    stdin()
+        .read_line(&mut input);
+
+}
+
+/*
+    quando chegamos aqui, sabemos que alguem empatou. precisamos apenas achar qual a 
+    maior quantidade de cerebros, fixar ela, e remover aqueles que nao tem ela.
+
+*/
+fn draw_fn(players: &mut Vec<Player>, info_temp:&mut InfoTemp, estado: &mut Estado)
+{
+    let mut maior_cerebro = players[0].get_cerebros();
+
+
+    //essa parte aqui vai descobrir qual o numero de cerebros dos q empataram
+    for i in 0..players.len()
+    {
+        if players[i].get_cerebros() > maior_cerebro
+        {
+            maior_cerebro = players[i].get_cerebros();
+        } 
+    }
+
+    let num = *maior_cerebro;
+
+    players.retain(|player| *player.get_cerebros() == num);
+
+    info_temp.prox_turno(players.len());
+
+    *estado = Estado::Playing;
+
+    println!("{} jogadores empataram, continuando o jogo!\n", players.len());
+
+    let mut input = String::new();
+    stdin().read_line(&mut input);
+}
+
+
+
+/*
+vai retornar o estado em que o jogo se encontra atualmente apos o final do turno
+EMPATE
+VITORIA
+TURNO COMPLETO
+TURNO INCOMPLETO
+*/
+fn checa_empate_ou_vitoria(players: &mut Vec<Player>) -> Fases {
+    let num_players = players.len();
+
+    // checa se todos os jogadores jogaram a mesma quantidade de vezes
+    let turnos_referencia = players[0].get_turnos();
+    let todos_jogaram = players.iter().all(|p| p.get_turnos() == turnos_referencia);
+
+    if !todos_jogaram {
+        println!("o turno esta incompleto, alguem ainda nao jogou!\n");
+        return Fases::TurnoIncompleto;
+    }
+
+    // filtra apenas quem tem 13+ cerebros
+    let candidatos: Vec<&Player> = players
+        .iter()
+        .filter(|p| *p.get_cerebros() >= 13)
+        .collect();
+
+    if candidatos.is_empty() {
+        println!("ninguem ganhou, +1 turno geral!!\n");
+        return Fases::TurnoCompleto;
+    }
+
+    if candidatos.len() == 1 {
+        println!("temos 1 vencedor!!\nParabens {}", candidatos[0].get_nome());
+        return Fases::Ganhou;
+    }
+
+    // multiplos candidatos com 13+, checar se estao empatados no maior valor
+    let maior_cerebro = candidatos
+        .iter()
+        .map(|p| *p.get_cerebros())
+        .max()
+        .unwrap(); // seguro pq candidatos nao esta vazio aqui
+
+    let vencedores: Vec<&&Player> = candidatos
+        .iter()
+        .filter(|p| *p.get_cerebros() == maior_cerebro)
+        .collect();
+
+    if vencedores.len() == 1 {
+        println!("temos 1 vencedor!!\nParabens {}", vencedores[0].get_nome());
+        Fases::Ganhou
+    } else {
+        println!("deu empate entre {} jogadores!\n", vencedores.len());
+        Fases::Empate
+    }
+}

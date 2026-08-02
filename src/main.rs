@@ -3,27 +3,20 @@ mod dice_bag;
 mod game_controler;
 mod player;
 mod zdice;
-
+use crate::{dice_bag::DiceBag, game_controler::{Estado, InfoTemp, Update}, player::Player};
 use std::io::stdin;
 
 fn main() {
-    let mut input = String::new();
-    println!("bem vindo ao zombie dice\n por favor, insira o nome dos jogadores");
-        stdin()
-        .read_line(&mut input)
-        .expect("falha ao ler input");
+ 
+    let mut info_temp = InfoTemp::new(); 
+    let mut estado = Estado::Welcome;
+    let mut players: Vec<Player> = Vec::new();
+    let mut rodando = true;
+    let mut dados = DiceBag::new();
 
-    let mut jogadores :Vec<String> = input.split(',').map(|s| s.to_string()).collect();
-
-    for i in 0..jogadores.len()
+    while rodando
     {
-       jogadores[i] = jogadores[i].trim().to_string();
-    }
-    
-
-    for i in 0..jogadores.len()
-    {
-        println!("nome:{}", jogadores[i]);
+        Update(&mut estado, &mut players, &mut dados, &mut info_temp, &mut rodando);
     }
 }
 
